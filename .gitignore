@@ -1,0 +1,13 @@
+node_modules/
+
+# The .tokens folder contains sensitive information and should not be checked in
+.tokens/
+
+# The output folder may contain personal user data
+output/
+
+# env file
+.env
+!.env.example
+
+.DS_Store

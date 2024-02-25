@@ -1,0 +1,32 @@
+{
+  "name": "google-contacts-sync",
+  "version": "1.0.0",
+  "description": "",
+  "main": "bin/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node bin/index.js list --account alexboone29@gmail.com",
+    "lint": "eslint ."
+  },
+  "type": "module",
+  "keywords": [],
+  "author": "",
+  "license": "GPL-3.0-only",
+  "dependencies": {
+    "async-retry": "^1.3.3",
+    "boxen": "^7.1.1",
+    "chalk": "^5.3.0",
+    "cli-progress": "^3.12.0",
+    "commander": "^12.0.0",
+    "dotenv": "^16.4.5",
+    "figlet": "^1.7.0",
+    "googleapis": "^133.0.0",
+    "node-persist": "^4.0.1",
+    "readline": "^1.3.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "3.2.5"
+  }
+}
