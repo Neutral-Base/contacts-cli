@@ -1,5 +1,5 @@
-import cliProgress from "cli-progress";
-import { google } from "googleapis";
+import cliProgress from 'cli-progress';
+import { google } from 'googleapis';
 
 /**
  * List all contacts from the authenticated user's Google Contacts.
@@ -9,27 +9,27 @@ import { google } from "googleapis";
  * @param {google.auth.OAuth2} authClient - The authenticated Google OAuth client.
  */
 export async function listContacts(authClient) {
-  const people = google.people({ version: "v1", auth: authClient });
+  const people = google.people({ version: 'v1', auth: authClient });
   const results = [];
   let nextPageToken = null;
   do {
     const res = await people.people.connections.list({
-      resourceName: "people/me",
+      resourceName: 'people/me',
       pageSize: 1000,
       pageToken: nextPageToken,
       // The fields to include in the response. By default we try to get all the fields.
       // TODO: allow users to specify which fields they want to retrieve.
       personFields:
-        "addresses,ageRanges,biographies," +
-        "birthdays,calendarUrls,clientData," +
-        "coverPhotos,emailAddresses,events," +
-        "externalIds,genders,imClients," +
-        "interests,locales,locations," +
-        "memberships,metadata,miscKeywords," +
-        "names,nicknames,occupations," +
-        "organizations,phoneNumbers,photos," +
-        "relations,sipAddresses,skills," +
-        "urls,userDefined",
+        'addresses,ageRanges,biographies,' +
+        'birthdays,calendarUrls,clientData,' +
+        'coverPhotos,emailAddresses,events,' +
+        'externalIds,genders,imClients,' +
+        'interests,locales,locations,' +
+        'memberships,metadata,miscKeywords,' +
+        'names,nicknames,occupations,' +
+        'organizations,phoneNumbers,photos,' +
+        'relations,sipAddresses,skills,' +
+        'urls,userDefined',
     });
     results.push(res.data.connections);
     nextPageToken = res.data.nextPageToken;
@@ -46,10 +46,10 @@ export async function listContacts(authClient) {
 function objectCleaner(obj) {
   const keys = Object.keys(obj);
   for (const key of keys) {
-    if (key === "id" || key === "resourceName") {
+    if (key === 'id' || key === 'resourceName') {
       delete obj[key];
     }
-    if (typeof obj[key] === "object") {
+    if (typeof obj[key] === 'object') {
       objectCleaner(obj[key]);
     }
   }
@@ -66,7 +66,7 @@ function processContact(contactData, options) {
   let defaultMembership = [
     {
       contactGroupMembership: {
-        contactGroupResourceName: "contactGroups/myContacts",
+        contactGroupResourceName: 'contactGroups/myContacts',
       },
     },
   ];
@@ -98,13 +98,13 @@ function processContact(contactData, options) {
   // Only include names that have source type of CONTACT
   if (contactData.names) {
     contactData.names = contactData.names.filter(
-      (name) => name.metadata?.source?.type === "CONTACT"
+      (name) => name.metadata?.source?.type === 'CONTACT'
     );
   }
   // Only include email addresses that have source type of CONTACT
   if (contactData.emailAddresses) {
     contactData.emailAddresses = contactData.emailAddresses.filter(
-      (email) => email.metadata?.source?.type === "CONTACT"
+      (email) => email.metadata?.source?.type === 'CONTACT'
     );
   }
   // Replace the memberships field with the default membership
@@ -124,7 +124,7 @@ export async function createContact(authClient, contactData, options = {}) {
   // Process the contact data
   contactData = await processContact(contactData, options);
 
-  const people = google.people({ version: "v1", auth: authClient });
+  const people = google.people({ version: 'v1', auth: authClient });
   people.people
     .createContact({
       requestBody: contactData,
@@ -133,7 +133,7 @@ export async function createContact(authClient, contactData, options = {}) {
       return res.data;
     })
     .catch((error) => {
-      console.error("error message:", error.response?.data?.error?.message);
+      console.error('error message:', error.response?.data?.error?.message);
     });
 }
 
@@ -152,7 +152,7 @@ export async function batchCreateContacts(authClient, contacts, options = {}) {
   });
 
   const BATCH_SIZE = 25;
-  const people = google.people({ version: "v1", auth: authClient });
+  const people = google.people({ version: 'v1', auth: authClient });
   const results = [];
   const failed = [];
   const progress = new cliProgress.SingleBar(
@@ -175,7 +175,7 @@ export async function batchCreateContacts(authClient, contacts, options = {}) {
       })
       .catch((error) => {
         failed.push(batch);
-        console.error("error message:", error.response?.data?.error?.message);
+        console.error('error message:', error.response?.data?.error?.message);
       });
 
     // wait for 5 seconds before making the next request
