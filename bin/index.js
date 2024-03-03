@@ -152,7 +152,11 @@ contactGroups
     '-a, --account <account>',
     'The Google account to list the contact groups for'
   )
-  .action(async ({ account }) => {
+  .option(
+    '-o, --output <file>',
+    'The output file to write the contact groups to. If not provided, the contact groups will be written to the console.'
+  )
+  .action(async ({ account, output }) => {
     if (!account) {
       console.error('No account provided');
       process.exit(1);
@@ -172,6 +176,20 @@ contactGroups
           'group-type': group.groupType,
         }))
       );
+
+      if (output) {
+        // check if the output folder exists
+        const outputDir = path.dirname(output);
+        if (!fs.existsSync(outputDir)) {
+          fs.mkdirSync(outputDir, { recursive: true });
+        }
+        // check if the file exists
+        if (fs.existsSync(output)) {
+          console.warn('File already exists. Overwriting...');
+        }
+        // TODO: ask for user confirmation before overwriting the file
+        fs.writeFileSync(output, JSON.stringify(result.contactGroups, null, 2));
+      }
     } catch (error) {
       console.error('Error:', error);
     }
