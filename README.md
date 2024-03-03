@@ -1,86 +1,92 @@
 # Contacts-CLI
 
-## Discalimer: 
-User be advised. 
+## Discalimer:
 
-The following software is still under active development and is not meant for use 
-in a production environment. The developer of this product will not take any responsibility 
-for damagers incurred from this tool. Use at your own risk. 
+User be advised.
+
+The following software is still under active development and is not meant for use
+in a production environment. The developer of this product will not take any responsibility
+for damagers incurred from this tool. Use at your own risk.
 
 ## Supported platforms:
-Currently, only Google contacts is supported, but we plan on supporting more 
-in the future. 
 
-## Requirements: 
+Currently, only Google contacts is supported, but we plan on supporting more
+in the future.
+
+## Requirements:
+
 - NodeJS v20
 - GCP project with the People API enabled
 
-This program has only been tested on MacOS Ventura 13.1. It should however, 
-work on other systems with the correct NodeJS version. 
+This program has only been tested on MacOS Ventura 13.1. It should however,
+work on other systems with the correct NodeJS version.
 
-## Setting up the GCP project: 
+## Setting up the GCP project:
 
 **Prerequisites**
 
-* A Google Account
-* A Google Cloud Platform project (If you don't have one, you'll be guided to create one)
+- A Google Account
+- A Google Cloud Platform project (If you don't have one, you'll be guided to create one)
 
 **Steps**
 
 1. **Enable the People API**
 
-   * Navigate to the Google Cloud Console: https://console.cloud.google.com/
-   * Select your GCP project from the dropdown at the top.
-   * In the search bar, type "People API" and select it from the results.
-   * Click the **"Enable"** button.
+   - Navigate to the Google Cloud Console: https://console.cloud.google.com/
+   - Select your GCP project from the dropdown at the top.
+   - In the search bar, type "People API" and select it from the results.
+   - Click the **"Enable"** button.
 
 2. **Configure the OAuth Consent Screen**
 
-   * In the Google Cloud Console, go to **APIs & Services** -> **OAuth Consent Screen**.
-   * Select the appropriate user type (Internal or External).
-   * Fill out the required app information.
+   - In the Google Cloud Console, go to **APIs & Services** -> **OAuth Consent Screen**.
+   - Select the appropriate user type (Internal or External).
+   - Fill out the required app information.
 
 3. **Add Scopes**
 
-   * In the "Scopes" section, click **"Add or Remove Scopes"**.
-   * Search for `auth/contacts` and select it (and optionally `auth/contacts.readonly`).
-   * Click **"Update"**
+   - In the "Scopes" section, click **"Add or Remove Scopes"**.
+   - Search for `auth/contacts` and select it (and optionally `auth/contacts.readonly`).
+   - Click **"Update"**
 
 4. **Obtain Credentials**
 
-   * Go to **APIs & Services** -> **Credentials**.
-   * Click **"Create credentials"** and select **"OAuth client ID"**.
-   * Choose `Desktop app` as the application type.
-   * Click **"Create"** and store your client ID and client secret securely.
+   - Go to **APIs & Services** -> **Credentials**.
+   - Click **"Create credentials"** and select **"OAuth client ID"**.
+   - Choose `Desktop app` as the application type.
+   - Click **"Create"** and store your client ID and client secret securely.
 
 **Important Notes:**
 
-* **Verification:** Apps using sensitive scopes might need verification.
-* **Scope Best Practices:** Request only the minimum necessary scopes. 
+- **Verification:** Apps using sensitive scopes might need verification.
+- **Scope Best Practices:** Request only the minimum necessary scopes.
 
 **Code Example (Illustrative: Choose a language)**
 
 ## Setting up the CLI:
+
 1. Install the packages.
+
 ```bash
 # npm
 npm install
 ```
+
 ```bash
 # yarn
 yarn
 ```
 
-2. Make a copy of `.env.example` and set the environment variables specific to 
-your GCP project. You will find these values in the credentials file that you 
-obtained from the `Setting up the GCP project` step. 
-
+2. Make a copy of `.env.example` and set the environment variables specific to
+   your GCP project. You will find these values in the credentials file that you
+   obtained from the `Setting up the GCP project` step.
 
 ## Usage:
 
-Since this program is not a proper package yet, it is necessary to run commands 
-from the project root. If for some reason, the program fails, please make sure 
-that the following folders exist: 
+Since this program is not a proper package yet, it is necessary to run commands
+from the project root. If for some reason, the program fails, please make sure
+that the following folders exist:
+
 - `.tokens`, for storing user auth tokens
 - `output` which is the default location for storing results, if applicable
 
@@ -116,11 +122,19 @@ node bin/index.js contacts import -d desitnation@gmail.com -f <path to file>
 node bin/index.js contact-groups list -a test@gmail.com
 ```
 
+For saving to a file
+
+```bash
+node bin/index.js contact-groups list -a test@gmail.com -o <path to output file>
+```
+
+Please note that if the directory does not exist, the program will create the directory for you. If a file with the same name exists, the program will overwrite the file.
 
 ### Todo:
+
 - Create npm package
-- Introduce semver and release cycles 
-- Logging 
+- Introduce semver and release cycles
+- Logging
 - Support more services such as Apple contacts and Microsoft contacts
 - Graciously handle daily limits
 - Create more efficient batching for handling failed batches
