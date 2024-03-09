@@ -6,8 +6,8 @@ import figlet from 'figlet';
 import * as commander from 'commander';
 
 import * as auth from './auth.js';
-import * as contactsAPI from './contacts.js';
-import * as contactGroupsAPI from './contact-groups.js';
+import * as contactsAPI from './google/contacts.js';
+import * as contactGroupsAPI from './google/contact-groups.js';
 
 const program = new commander.Command();
 

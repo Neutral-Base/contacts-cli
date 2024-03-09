@@ -56,7 +56,10 @@ function objectCleaner(obj) {
 }
 
 /**
- * Process the contact data and return a cleaned up version of the data
+ * Process the contact data and return a cleaned up version of the data that
+ * can be imported into other Google accounts. An optional options object can be
+ * provided to specify the contact groups to add the contact to. Other options
+ * may be added in the future.
  * @param {*} contactData
  * @param {*} options
  * @returns
