@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import readline from 'node:readline';
+import open from 'open';
 import { google } from 'googleapis';
 // load env variables
 import config from './config.js';
@@ -64,6 +65,7 @@ export async function getAccessToken(accountEmail) {
   });
 
   console.log('Authorize this app by visiting this url:', authUrl);
+  open(authUrl);
   const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,

@@ -1,4 +1,4 @@
-// @eslint-disable-next-line import/no-extraneous-dependencies
+// eslint-disable-next-line no-unused-vars
 import dotenv from 'dotenv/config';
 
 export default {
