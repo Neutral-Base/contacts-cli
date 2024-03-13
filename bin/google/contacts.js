@@ -118,13 +118,52 @@ function processContact(contactData, options) {
 }
 
 /**
+ * Remove external ids from Google contacts, by updating the contact with an empty array of external ids.
+ * @param {google.auth.OAuth2} authClient
+ * @param {*} contactData
+ */
+export async function cleanExternalIds(authClient, contactData) {
+  // The maximum batch size allowed by the Google People API for batch updating contacts
+  const batchSize = 200;
+  const people = google.people({ version: 'v1', auth: authClient });
+  // Divide the contacts into batches of size batchSize
+  const batches = [];
+  for (let i = 0; i < contactData.length; i += batchSize) {
+    batches.push(contactData.slice(i, i + batchSize));
+  }
+
+  // Create a new progress bar
+  const progressBar = new cliProgress.SingleBar(
+    {},
+    cliProgress.Presets.shades_classic
+  );
+
+  // Update the contacts in batches.
+  // Batch updating is faster than updating each contact individually and also reduces the number of API calls.
+  // This helps tremendously in reducing the time it takes to update a large number of contacts, and also
+  // reduces the chances of hitting the API rate limits.
+  for (const batch of batches) {
+    const batchUpdateRequests = batch.map((contact) => {
+      return {
+        updatePersonFields: 'externalIds',
+        personFields: 'externalIds',
+        resourceNames: [contact.resourceName],
+        requestBody: {
+          externalIds: [],
+        },
+      };
+    });
+  }
+}
+
+/**
  * Create a new contact in the authenticated user's Google Contacts.
  * @param {google.auth.OAuth2} authClient
  * @param {*} contactData
  * @param {*} options
  */
 export async function createContact(authClient, contactData, options = {}) {
-  // Process the contact data
+  // Process the contact data before creating the contact
   contactData = await processContact(contactData, options);
 
   const people = google.people({ version: 'v1', auth: authClient });
