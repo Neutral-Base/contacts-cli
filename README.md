@@ -140,6 +140,13 @@ pass in the `--url-type` flag to indicate the type of url to remove.
 node bin/index.js contacts clean --urls --url-type "Dex Contact Details" -f <path to file> -a test@gmail.com
 ```
 
+If a file is not provided, the data will be fetched from the account.
+This may be useful when the data on the local file is outdated.
+
+```bash
+node bin/index.js contacts clean --urls --url-type "Dex Contact Details" -a test@gmail.com
+```
+
 #### Clean external ids from the contacts of a specific account
 
 Not implemented yet.
