@@ -3,6 +3,8 @@ import path from 'node:path';
 import chalk from 'chalk';
 import boxen from 'boxen';
 import figlet from 'figlet';
+import cliSpinners from 'cli-spinners';
+import ora from 'ora';
 import * as commander from 'commander';
 
 import * as auth from './auth.js';
@@ -13,7 +15,7 @@ const program = new commander.Command();
 
 const contacts = program.command('contacts');
 const contactGroups = program.command('contact-groups');
-const utlis = program.command('utils');
+const utils = program.command('utils');
 
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
@@ -199,9 +201,20 @@ contacts
       // Get the access token for the account
       const sourceClient = await auth.authorize(account);
       // Get the contacts for the account from file
-      const contactsData = file
-        ? JSON.parse(fs.readFileSync(file))
-        : await contactsAPI.listContacts(sourceClient);
+      let contactsData;
+      if (file) {
+        contactsData = JSON.parse(fs.readFileSync(file));
+      } else {
+        console.warn(chalk.yellow('Reading contacts from the account'));
+        const spinner = ora({
+          text: `Retrieving contacts from: ${account}`,
+          spinner: cliSpinners.binary,
+          color: 'green',
+        }).start();
+        contactsData = await contactsAPI.listContacts(sourceClient);
+        spinner.stop();
+      }
+
       console.info(`Retrieved ${contactsData.length} contacts`);
 
       // Clean the contacts
@@ -244,11 +257,16 @@ contactGroups
       process.exit(1);
     }
     try {
-      console.info(`Listing contact groups for account: ${account}`);
       // Get the access token for the account
       const sourceClient = await auth.authorize(account);
       // Get the contact groups for the account
+      const spinner = ora({
+        text: `Retrieving contact groups for account: ${account}`,
+        spinner: cliSpinners.binary,
+        color: 'green',
+      }).start();
       const result = await contactGroupsAPI.listContactGroups(sourceClient);
+      spinner.stop();
       console.info(`Retrieved ${result.contactGroups.length} contact groups`);
       console.table(
         result.contactGroups.map((group) => ({
@@ -277,7 +295,7 @@ contactGroups
     }
   });
 
-utlis
+utils
   .command('summarize-data')
   .description(
     'Summarize the data obtained from the export command. The file must be a valid JSON file.'
@@ -297,6 +315,20 @@ utlis
     const contacts = JSON.parse(fs.readFileSync(file));
     console.info(`Read ${contacts.length} contacts from file: ${file}`);
     // Add more summarization logic here.
+  });
+
+utils
+  .command('test')
+  .description('A command to test the CLI')
+  .action(() => {
+    const spinner = ora({
+      text: 'Testing the CLI',
+      spinner: cliSpinners.binary,
+      color: 'yellow',
+    }).start();
+    setTimeout(() => {
+      spinner.succeed('Test completed');
+    }, 5000);
   });
 
 // Welcome message and banner displayed when the CLI is run.
