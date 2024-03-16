@@ -130,6 +130,20 @@ node bin/index.js contact-groups list -a test@gmail.com -o <path to output file>
 
 Please note that if the directory does not exist, the program will create the directory for you. If a file with the same name exists, the program will overwrite the file.
 
+#### Clean urls from the contacts of a specific account
+
+This command will remove all urls from the contacts of a specific account. The
+`--urls` flag is required to indicate that urls should be removed. You need to
+pass in the `--url-type` flag to indicate the type of url to remove.
+
+```bash
+node bin/index.js contacts clean --urls --url-type "Dex Contact Details" -f <path to file> -a test@gmail.com
+```
+
+#### Clean external ids from the contacts of a specific account
+
+Not implemented yet.
+
 ### Todo:
 
 - Create npm package

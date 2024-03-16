@@ -126,6 +126,7 @@ export async function cleanExternalIds(authClient, contactData) {
   // The maximum batch size allowed by the Google People API for batch updating contacts
   const batchSize = 200;
   const people = google.people({ version: 'v1', auth: authClient });
+  const failed = [];
   // Divide the contacts into batches of size batchSize
   const batches = [];
   for (let i = 0; i < contactData.length; i += batchSize) {
@@ -138,11 +139,14 @@ export async function cleanExternalIds(authClient, contactData) {
     cliProgress.Presets.shades_classic
   );
 
-  // Update the contacts in batches.
   // Batch updating is faster than updating each contact individually and also reduces the number of API calls.
   // This helps tremendously in reducing the time it takes to update a large number of contacts, and also
   // reduces the chances of hitting the API rate limits.
-  for (const batch of batches) {
+  // Start the progress bar
+  progressBar.start(batches.length, 0);
+  // Update the contacts in batches
+  for (let i = 0; i < batches.length; i++) {
+    const batch = batches[i];
     const batchUpdateRequests = batch.map((contact) => {
       return {
         updatePersonFields: 'externalIds',
@@ -153,7 +157,107 @@ export async function cleanExternalIds(authClient, contactData) {
         },
       };
     });
+    await people.people
+      .batchUpdateContacts({
+        requestBody: {
+          requests: batchUpdateRequests,
+        },
+      })
+      .then(() => {
+        progressBar.increment();
+      })
+      .catch((error) => {
+        console.error('error message:', error.response?.data?.error?.message);
+        failed.push(...batch);
+      });
   }
+
+  // Stop the progress bar
+  // This will also clear the progress bar
+  progressBar.stop();
+
+  // Return the updated contacts
+  return failed;
+}
+
+/**
+ * Clean the URLs from Google contacts, by filtering out URLs that are of the specified type.
+ * @param {google.auth.OAuth2} authClient
+ * @param {*} contactData
+ * @param {string} urlType
+ */
+export async function cleanUrls(authClient, contactData, urlType) {
+  const batchSize = 100;
+  const batches = [];
+  const failed = [];
+  const people = google.people({ version: 'v1', auth: authClient });
+  const updatedContacts = [];
+
+  for (let i = 0; i < contactData.length; i += batchSize) {
+    batches.push(contactData.slice(i, i + batchSize));
+  }
+
+  const progressBar = new cliProgress.SingleBar(
+    {},
+    cliProgress.Presets.shades_classic
+  );
+
+  progressBar.start(batches.length, 0);
+
+  for (let i = 0; i < batches.length; i++) {
+    const batch = batches[i];
+    const payload = {
+      contacts: {},
+      readMask: 'metadata,names',
+      updateMask: 'urls',
+    };
+
+    for (const contact of batch) {
+      if (!contact.urls) {
+        continue;
+      }
+      // Check if the contact has any URL of the specified type
+      // If it does, remove the URL from the contact and mark the contact for update
+      const urls = contact.urls.filter((url) => url.type !== urlType);
+      if (urls.length === contact.urls.length) {
+        continue;
+      }
+      payload.contacts[contact.resourceName] = {
+        urls,
+        etag: contact.etag,
+      };
+    }
+
+    if (Object.keys(payload.contacts).length === 0) {
+      continue;
+    }
+
+    await people.people
+      .batchUpdateContacts({
+        requestBody: payload,
+      })
+      .then((res) => {
+        updatedContacts.push(
+          ...Object.keys(res.data.updateResult).map((key) => {
+            return res.data.updateResult[key];
+          })
+        );
+        progressBar.increment();
+        updatedContacts.push();
+      })
+      .catch((error) => {
+        console.error('error message:', error.response?.data?.error?.message);
+        failed.push(...batch);
+      });
+
+    await new Promise((resolve) => setTimeout(resolve, 10000));
+  }
+
+  progressBar.stop();
+  return {
+    updated: updatedContacts.flat(),
+    failed,
+  };
 }
 
 /**

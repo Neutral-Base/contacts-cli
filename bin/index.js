@@ -31,7 +31,7 @@ contacts
     'The output file to write the contacts to. If not provided, the contacts will be written to the console.'
   )
   // TODO: add more options for more fine-grained control over which contacts to list
-  .action(async ({ account }) => {
+  .action(async ({ account, output }) => {
     if (!account) {
       console.error('No account provided');
       process.exit(1);
@@ -48,6 +48,14 @@ contacts
 
       // Write the contacts to the file systems as a JSON file
       const now = new Date();
+
+      if (output) {
+        const filePath = path.join(__dirname, '..', 'output', output);
+        fs.writeFileSync(filePath, JSON.stringify(contacts, null, 2));
+        console.info(`Contacts written to: ${filePath}`);
+        return;
+      }
+
       const outputDir = path.join(__dirname, '..', 'output', account);
 
       if (!fs.existsSync(outputDir)) {
@@ -63,10 +71,13 @@ contacts
 contacts
   .command('import')
   .description('Imports contacts to a given account.')
-  .option('-s, --source <source>', 'The Google account to sync the contacts to')
+  .option(
+    '-s, --source <source>',
+    'The Google account to sync the contacts from.'
+  )
   .option(
     '-d, --destination <destination>',
-    'Optional Google account to sync the contacts from. If not provided a file must be provided instead.'
+    'Optional Google account to sync the contacts to. If not provided a file must be provided instead.'
   )
   .option(
     '-f, --file <file>',
@@ -84,7 +95,7 @@ contacts
     const file = options.file;
     const source = options.source;
     const destination = options.destination;
-    const contactGroups = options.contactGroups;
+    const contactGroups = options.contactGroups?.split(',') ?? undefined;
 
     console.debug('Options:', options);
 
@@ -115,7 +126,7 @@ contacts
         destinationClient,
         contacts,
         {
-          contactGroups: contactGroups.split(','),
+          contactGroups: contactGroups,
         }
       );
 
@@ -142,6 +153,77 @@ contacts
     } else {
       console.error('No source account or file provided');
       process.exit(1);
+    }
+  });
+
+contacts
+  .command('clean')
+  .description(
+    'Cleans the contacts for a given account. Cleaning includes removing unnecessary external ids and urls.'
+  )
+  .option(
+    '-a, --account <account>',
+    'The Google account to clean the contacts for'
+  )
+  .option('--urls', 'Remove urls from the contacts')
+  .option(
+    '--url-type <url-type>',
+    'The type of url to remove from the contacts. The command will fail if not provided but the --urls flag is on.'
+  )
+  .option('--external-ids', 'Remove external ids from the contacts')
+  .option(
+    '-f, --file <file>',
+    'The file to read the contacts from. If not provided, the contacts will be read from the account via API.'
+  )
+  .action(async ({ account, file, externalIds, urls, urlType }) => {
+    // validate command options
+    if (!account) {
+      console.error('No account provided');
+      process.exit(1);
+    }
+
+    // if the urls flag is on, the url type must be provided
+    if (urls && !urlType) {
+      console.error('No url type provided');
+      process.exit(1);
+    }
+
+    // either the file or the external ids or urls flag must be provided
+    if (!file && !externalIds && !urls) {
+      console.error('No file or external ids or urls flag provided');
+      process.exit(1);
+    }
+
+    try {
+      console.info(`Cleaning contacts for account: ${account}`);
+      // Get the access token for the account
+      const sourceClient = await auth.authorize(account);
+      // Get the contacts for the account from file
+      const contactsData = file
+        ? JSON.parse(fs.readFileSync(file))
+        : await contactsAPI.listContacts(sourceClient);
+      console.info(`Retrieved ${contactsData.length} contacts`);
+
+      // Clean the contacts
+      // Remove urls
+      if (urls) {
+        const { updated, failed } = await contactsAPI.cleanUrls(
+          sourceClient,
+          contactsData,
+          urlType
+        );
+        console.info(`Updated ${updated.length} contacts`);
+        console.info(`Failed to update ${failed.length} contacts`);
+      }
+
+      // Remove external ids
+      // TODO: implement the removeExternalIds method
+      if (externalIds) {
+        console.error('Not implemented yet');
+        process.exit(1);
+      }
+    } catch (error) {
+      console.error('Error:', error);
     }
   });
 
