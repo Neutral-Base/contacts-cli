@@ -7,9 +7,9 @@ import cliSpinners from 'cli-spinners';
 import ora from 'ora';
 import * as commander from 'commander';
 
-import * as auth from './auth.js';
-import * as contactsAPI from './google/contacts.js';
-import * as contactGroupsAPI from './google/contact-groups.js';
+import * as auth from '../lib/google/auth.js';
+import * as contactsAPI from '../lib/google/contacts.js';
+import * as contactGroupsAPI from '../lib/google/contact-groups.js';
 
 const program = new commander.Command();
 
