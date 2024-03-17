@@ -1,6 +1,6 @@
 # Contacts-CLI
 
-## Discalimer:
+## Disclaimer:
 
 User be advised.
 
@@ -8,7 +8,7 @@ The following software is still under active development and is not meant for us
 in a production environment. The developer of this product will not take any responsibility
 for damagers incurred from this tool. Use at your own risk.
 
-## Supported platforms:
+## Supported Services:
 
 Currently, only Google contacts is supported, but we plan on supporting more
 in the future.
@@ -162,3 +162,4 @@ Not implemented yet.
 - Introduce back-off when adding contacts one-by-one
 - Implement better error-handling
 - Implement unit tests
+- Create routines for periodic contact backups
