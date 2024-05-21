@@ -10,4 +10,7 @@ output/
 .env
 !.env.example
 
+# Key file
+key.json
+
 .DS_Store
